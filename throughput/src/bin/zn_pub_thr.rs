@@ -11,6 +11,7 @@
 // Contributors:
 //   ADLINK zenoh team, <zenoh@adlink-labs.tech>
 //
+
 use async_std::{task, sync::Arc};
 use std::{
     path::PathBuf,
@@ -21,15 +22,15 @@ use std::{
 use structopt::StructOpt;
 use zenoh::{
     prelude::{Locator, Value},
+    publication::CongestionControl,
     config::{
         Config,
         whatami::WhatAmI,
     }
 };
 
-
 #[derive(Debug, StructOpt)]
-#[structopt(name = "z_put_thr")]
+#[structopt(name = "zn_pub_thr")]
 struct Opt {
     #[structopt(short, long, help = "locator(s), e.g. --locator tcp/127.0.0.1:7447 tcp/127.0.0.1:7448")]
     locator: Vec<Locator>,
@@ -71,12 +72,15 @@ async fn main() {
         config
     };
 
+    let session = zenoh::open(config).await.unwrap();
+    let expr_id = session.declare_expr(KEY_EXPR).await.unwrap();
+    session.declare_publication(expr_id);
+
     let value: Value = (0usize..payload)
         .map(|i| (i % 10) as u8)
         .collect::<Vec<u8>>()
         .into();
 
-    let session = zenoh::open(config).await.unwrap();
 
     if print {
         let count = Arc::new(AtomicUsize::new(0));
@@ -92,12 +96,20 @@ async fn main() {
         });
 
         loop {
-            session.put(KEY_EXPR, value.clone()).await.unwrap();
+            session
+                .put(KEY_EXPR, value.clone())
+                .congestion_control(CongestionControl::Block)
+                .await
+                .unwrap();
             c_count.fetch_add(1, Ordering::Relaxed);
         }
     } else {
         loop {
-            session.put(KEY_EXPR, value.clone()).await.unwrap();
+            session
+                .put(KEY_EXPR, value.clone())
+                .congestion_control(CongestionControl::Block)
+                .await
+                .unwrap();
         }
     }
 }

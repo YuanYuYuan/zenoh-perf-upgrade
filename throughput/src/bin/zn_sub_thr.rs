@@ -13,23 +13,20 @@
 //
 use async_std::{task, sync::Arc};
 use std::{
-    path::PathBuf,
+    time::{Duration, Instant},
     sync::atomic::{AtomicUsize, Ordering},
-    time::Duration,
+    path::PathBuf,
     str::FromStr,
 };
 use structopt::StructOpt;
 use zenoh::{
-    prelude::{Locator, Value},
-    config::{
-        Config,
-        whatami::WhatAmI,
-    }
+    config::{Config, whatami::WhatAmI},
+    prelude::Locator,
 };
 
 
 #[derive(Debug, StructOpt)]
-#[structopt(name = "z_put_thr")]
+#[structopt(name = "z_sub_thr")]
 struct Opt {
     #[structopt(short, long, help = "locator(s), e.g. --locator tcp/127.0.0.1:7447 tcp/127.0.0.1:7448")]
     locator: Vec<Locator>,
@@ -37,8 +34,10 @@ struct Opt {
     mode: String,
     #[structopt(short, long, help = "payload size (bytes)")]
     payload: usize,
-    #[structopt(short = "t", long, help = "print the counter")]
-    print: bool,
+    #[structopt(short, long)]
+    name: String,
+    #[structopt(short, long)]
+    scenario: String,
     #[structopt(long = "conf", help = "configuration file (json5)")]
     config: Option<PathBuf>,
 }
@@ -47,7 +46,7 @@ const KEY_EXPR: &str = "/test/thr";
 
 #[async_std::main]
 async fn main() {
-    // Initiate logging
+    // initiate logging
     env_logger::init();
 
     // Parse the args
@@ -55,49 +54,60 @@ async fn main() {
         locator,
         mode,
         payload,
-        print,
+        name,
+        scenario,
         config
     } = Opt::from_args();
+
     let config = {
         let mut config: Config = if let Some(path) = config {
             json5::from_str(&async_std::fs::read_to_string(path).await.unwrap()).unwrap()
         } else {
             Config::default()
         };
-        config.set_mode(Some(WhatAmI::from_str(&mode).unwrap())).unwrap();
-        config.set_add_timestamp(Some(false)).unwrap();
+        let mode = WhatAmI::from_str(&mode).unwrap();
+        config.set_mode(Some(mode)).unwrap();
         config.scouting.multicast.set_enabled(Some(false)).unwrap();
-        config.peers.extend(locator);
+        match mode {
+            WhatAmI::Peer => config.set_listeners(locator).unwrap(),
+            WhatAmI::Client => config.set_peers(locator).unwrap(),
+            _ => panic!("Unsupported mode: {}", mode),
+        };
         config
     };
 
-    let value: Value = (0usize..payload)
-        .map(|i| (i % 10) as u8)
-        .collect::<Vec<u8>>()
-        .into();
-
     let session = zenoh::open(config).await.unwrap();
+    let expr_id = session.declare_expr(KEY_EXPR).await.unwrap();
 
-    if print {
-        let count = Arc::new(AtomicUsize::new(0));
-        let c_count = count.clone();
-        task::spawn(async move {
-            loop {
-                task::sleep(Duration::from_secs(1)).await;
-                let c = count.swap(0, Ordering::Relaxed);
-                if c > 0 {
-                    println!("{} msg/s", c);
-                }
-            }
-        });
+    let messages = Arc::new(AtomicUsize::new(0));
+    let c_messages = messages.clone();
 
-        loop {
-            session.put(KEY_EXPR, value.clone()).await.unwrap();
-            c_count.fetch_add(1, Ordering::Relaxed);
-        }
-    } else {
-        loop {
-            session.put(KEY_EXPR, value.clone()).await.unwrap();
+    let _subscriber = session
+        .subscribe(expr_id)
+        .callback(move |_| {
+            c_messages.fetch_add(1, Ordering::Relaxed);
+        })
+        .reliable()
+        .push_mode()
+        .await
+        .unwrap();
+
+
+    loop {
+        let now = Instant::now();
+        task::sleep(Duration::from_secs(1)).await;
+        let elapsed = now.elapsed().as_micros() as f64;
+
+        let c = messages.swap(0, Ordering::Relaxed);
+        if c > 0 {
+            let interval = 1_000_000.0 / elapsed;
+            println!(
+                "zenoh-net,{},throughput,{},{},{}",
+                scenario,
+                name,
+                payload,
+                (c as f64 / interval).floor() as usize
+            );
         }
     }
 }
