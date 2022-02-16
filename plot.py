@@ -5,6 +5,14 @@ import plotly.express as px
 import os
 from glob import glob
 from pathlib import Path
+from tap import Tap
+
+
+class MyArgParser(Tap):
+    # log dir
+    log_dir: Path = Path('./logs')
+    # output dir
+    out_dir: Path = Path('./outputs')
 
 
 def load_data(exp_dir: str, exp_tag: str = None) -> pd.DataFrame:
@@ -18,8 +26,10 @@ def load_data(exp_dir: str, exp_tag: str = None) -> pd.DataFrame:
         data['exp'] = exp_tag
     return data
 
-v5 = load_data('./logs/v5', '0.5.0-beta.9')
-v6 = load_data('./logs/v6', '0.6.0-dev')
+args = MyArgParser().parse_args()
+os.makedirs(args.out_dir, exist_ok=True)
+v5 = load_data(os.path.join(args.log_dir, 'v5'), '0.5.0-beta.9')
+v6 = load_data(os.path.join(args.log_dir, 'v6'), '0.6.0-dev')
 data = pd.concat([v5, v6])
 
 
@@ -36,7 +46,7 @@ fig = px.line(
     },
     title='Throughput Comparison (z_put_thr + z_sub_thr) in Ratio (v6 / v5)'
 )
-fig.write_html('throughput-comparison-in-ratio.html')
+fig.write_html(os.path.join(args.out_dir, 'throughput-comparison-in-ratio.html'))
 fig.show()
 
 
@@ -55,5 +65,5 @@ fig = px.line(
     },
     title='Throughput Comparison (z_put_thr + z_sub_thr)'
 )
-fig.write_html('throughput-comparison.html')
+fig.write_html(os.path.join(args.out_dir, 'throughput-comparison.html'))
 fig.show()
