@@ -61,7 +61,7 @@ async fn main() {
 
     let config = {
         let mut config: Config = if let Some(path) = config {
-            json5::from_str(&async_std::fs::read_to_string(path).await.unwrap()).unwrap()
+            Config::from_file(path).unwrap()
         } else {
             Config::default()
         };

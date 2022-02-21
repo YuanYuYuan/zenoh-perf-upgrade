@@ -78,6 +78,7 @@ async fn main() {
 
     let session = zenoh::open(config).await.unwrap();
     let expr_id = session.declare_expr(KEY_EXPR).await.unwrap();
+    session.declare_publication(expr_id);
 
     if print {
         let count = Arc::new(AtomicUsize::new(0));

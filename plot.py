@@ -10,9 +10,9 @@ from tap import Tap
 
 class MyArgParser(Tap):
     # log dir
-    log_dir: Path = Path('./logs')
+    log_dir: Path = Path('./outputs')
     # output dir
-    out_dir: Path = Path('./outputs')
+    out_dir: Path = Path('./plots')
     # experiment name
     exp_name: str = "z_put_thr + z_sub_thr"
 
@@ -29,10 +29,22 @@ def load_data(exp_dir: str, exp_tag: str = None) -> pd.DataFrame:
     return data
 
 
+def load_usage(exp_dir: Path, n_peers: int) -> pd.DataFrame:
+    data = pd.read_csv(
+        os.path.join(exp_dir, '%d/usage.txt' % n_peers),
+        sep='\\s+',
+        skiprows=1,
+        names=['t', 'CPU', 'MEM', 'VMEM']
+    )
+    data['n_peers'] = n_peers
+    data['MA_CPU'] = data['CPU'].rolling(30).mean()
+    return data
+
+
 args = MyArgParser().parse_args()
 os.makedirs(args.out_dir, exist_ok=True)
-v5 = load_data(os.path.join(args.log_dir, 'v5'), '0.5.0-beta.9')
-v6 = load_data(os.path.join(args.log_dir, 'v6'), '0.6.0-dev')
+v5 = load_data(os.path.join(args.log_dir, 'v5/logs'), '0.5.0-beta.9')
+v6 = load_data(os.path.join(args.log_dir, 'v6/logs'), '0.6.0-dev')
 data = pd.concat([v5, v6])
 
 
