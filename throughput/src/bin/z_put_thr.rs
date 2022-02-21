@@ -16,11 +16,11 @@ use std::{
     path::PathBuf,
     sync::atomic::{AtomicUsize, Ordering},
     time::Duration,
-    str::FromStr,
 };
 use structopt::StructOpt;
 use zenoh::{
     prelude::{Locator, Value},
+    publication::CongestionControl,
     config::{
         Config,
         whatami::WhatAmI,
@@ -34,12 +34,12 @@ struct Opt {
     #[structopt(short, long, help = "locator(s), e.g. --locator tcp/127.0.0.1:7447 tcp/127.0.0.1:7448")]
     locator: Vec<Locator>,
     #[structopt(short, long, help = "peer, router, or client")]
-    mode: String,
+    mode: WhatAmI,
     #[structopt(short, long, help = "payload size (bytes)")]
     payload: usize,
     #[structopt(short = "t", long, help = "print the counter")]
     print: bool,
-    #[structopt(long = "conf", help = "configuration file (json5)")]
+    #[structopt(long = "conf", help = "configuration file (json5 or yaml)")]
     config: Option<PathBuf>,
 }
 
@@ -60,11 +60,11 @@ async fn main() {
     } = Opt::from_args();
     let config = {
         let mut config: Config = if let Some(path) = config {
-            json5::from_str(&async_std::fs::read_to_string(path).await.unwrap()).unwrap()
+            Config::from_file(path).unwrap()
         } else {
             Config::default()
         };
-        config.set_mode(Some(WhatAmI::from_str(&mode).unwrap())).unwrap();
+        config.set_mode(Some(mode)).unwrap();
         config.set_add_timestamp(Some(false)).unwrap();
         config.scouting.multicast.set_enabled(Some(false)).unwrap();
         config.peers.extend(locator);
@@ -77,6 +77,7 @@ async fn main() {
         .into();
 
     let session = zenoh::open(config).await.unwrap();
+    let expr_id = session.declare_expr(KEY_EXPR).await.unwrap();
 
     if print {
         let count = Arc::new(AtomicUsize::new(0));
@@ -92,12 +93,20 @@ async fn main() {
         });
 
         loop {
-            session.put(KEY_EXPR, value.clone()).await.unwrap();
+            session
+                .put(expr_id, value.clone())
+                .congestion_control(CongestionControl::Block)
+                .await
+                .unwrap();
             c_count.fetch_add(1, Ordering::Relaxed);
         }
     } else {
         loop {
-            session.put(KEY_EXPR, value.clone()).await.unwrap();
+            session
+                .put(expr_id, value.clone())
+                .congestion_control(CongestionControl::Block)
+                .await
+                .unwrap();
         }
     }
 }

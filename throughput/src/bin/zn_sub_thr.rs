@@ -16,7 +16,6 @@ use std::{
     time::{Duration, Instant},
     sync::atomic::{AtomicUsize, Ordering},
     path::PathBuf,
-    str::FromStr,
 };
 use structopt::StructOpt;
 use zenoh::{
@@ -31,7 +30,7 @@ struct Opt {
     #[structopt(short, long, help = "locator(s), e.g. --locator tcp/127.0.0.1:7447 tcp/127.0.0.1:7448")]
     locator: Vec<Locator>,
     #[structopt(short, long, help = "peer, router, or client")]
-    mode: String,
+    mode: WhatAmI,
     #[structopt(short, long, help = "payload size (bytes)")]
     payload: usize,
     #[structopt(short, long)]
@@ -65,7 +64,6 @@ async fn main() {
         } else {
             Config::default()
         };
-        let mode = WhatAmI::from_str(&mode).unwrap();
         config.set_mode(Some(mode)).unwrap();
         config.scouting.multicast.set_enabled(Some(false)).unwrap();
         match mode {

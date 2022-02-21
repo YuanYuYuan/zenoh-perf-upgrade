@@ -17,9 +17,9 @@ members = [
   "throughput",
 ]
 
-# [profile.release]
-# debug=false
-# lto="fat"
-# codegen-units=1
-# opt-level=3
-# panic="abort"
+[profile.release]
+debug=false
+lto="fat"
+codegen-units=1
+opt-level=3
+panic="abort"

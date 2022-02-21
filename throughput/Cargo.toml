@@ -33,7 +33,7 @@ maintenance = { status = "actively-developed" }
 
 [dependencies]
 anyhow = "1.0.53"
-async-std = { version = "=1.9.0", features = ["unstable"] }
+async-std = { version = "=1.10.0", features = ["unstable"] }
 async-trait = "0.1.52"
 env_logger = "0.9.0"
 futures = "0.3.21"
@@ -42,8 +42,10 @@ log = "0.4.14"
 rand = "0.8.4"
 slab = "0.4.5"
 structopt = "0.3.26"
-zenoh = { git = "https://github.com/eclipse-zenoh/zenoh.git", rev = "8c17ec6a732141124ceace889ae7888c9df5f5c2", default-features = false, features = ["transport_tcp", "transport_udp"] }
-zenoh-util = { git = "https://github.com/eclipse-zenoh/zenoh.git", rev = "8c17ec6a732141124ceace889ae7888c9df5f5c2" }
+# zenoh = { git = "https://github.com/eclipse-zenoh/zenoh.git", rev = "8c17ec6a732141124ceace889ae7888c9df5f5c2", default-features = false, features = ["transport_tcp", "transport_udp"] }
+# zenoh-util = { git = "https://github.com/eclipse-zenoh/zenoh.git", rev = "8c17ec6a732141124ceace889ae7888c9df5f5c2" }
+zenoh = { path = "../../zenoh/zenoh", default-features = false, features = ["transport_tcp", "transport_udp"] }
+zenoh-util = { path = "../../zenoh/commons/zenoh-util" }
 
 # [[bin]]
 # name = "t_pub_thr"
