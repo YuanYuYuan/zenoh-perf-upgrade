@@ -13,6 +13,8 @@ class MyArgParser(Tap):
     log_dir: Path = Path('./logs')
     # output dir
     out_dir: Path = Path('./outputs')
+    # experiment name
+    exp_name: str = "z_put_thr + z_sub_thr"
 
 
 def load_data(exp_dir: str, exp_tag: str = None) -> pd.DataFrame:
@@ -25,6 +27,7 @@ def load_data(exp_dir: str, exp_tag: str = None) -> pd.DataFrame:
     if exp_tag:
         data['exp'] = exp_tag
     return data
+
 
 args = MyArgParser().parse_args()
 os.makedirs(args.out_dir, exist_ok=True)
@@ -44,9 +47,11 @@ fig = px.line(
         'size': 'Payload size (bytes)',
         'mean': 'Msg/sec ratio',
     },
-    title='Throughput Comparison (z_put_thr + z_sub_thr) in Ratio (v6 / v5)'
+    title='Throughput Comparison (' + args.exp_name + ') Ratio (v6 / v5)'
 )
-fig.write_html(os.path.join(args.out_dir, 'throughput-comparison-in-ratio.html'))
+file_name = os.path.join(args.out_dir, 'throughput-comparison-in-ratio')
+fig.write_html(file_name + '.html')
+fig.write_image(file_name + '.jpeg')
 fig.show()
 
 
@@ -63,7 +68,9 @@ fig = px.line(
         'mean': 'Msg/sec',
         'exp': 'Zenoh Ver.'
     },
-    title='Throughput Comparison (z_put_thr + z_sub_thr)'
+    title='Throughput Comparison (' + args.exp_name + ')'
 )
-fig.write_html(os.path.join(args.out_dir, 'throughput-comparison.html'))
+file_name = os.path.join(args.out_dir, 'throughput-comparison')
+fig.write_html(file_name + '.html')
+fig.write_image(file_name + '.jpeg')
 fig.show()
