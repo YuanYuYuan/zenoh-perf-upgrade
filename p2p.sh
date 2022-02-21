@@ -33,10 +33,8 @@ function ctrl_c() {
 }
 
 function cleanup() {
-    killall -9 z_sub_thr
-    killall -9 z_put_thr
-    killall -9 zn_sub_thr
-    killall -9 zn_pub_thr
+    killall -9 $SUB_PROGRAM
+    killall -9 $PUB_PROGRAM
 }
 
 PAYLOAD_LIST=(
@@ -100,7 +98,7 @@ for PAYLOAD in ${PAYLOAD_LIST[@]}; do
         --include-children \
         --duration $TEST_TIME
 
-    killall -9 z_sub_thr
+    killall -9 $SUB_PROGRAM
 
     # # ZENOH.NET
     # echo ">>> Starting zenoh.net test on SUB... $DATE"

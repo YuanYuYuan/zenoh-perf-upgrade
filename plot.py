@@ -29,7 +29,7 @@ def load_data(exp_dir: str, exp_tag: str = None) -> pd.DataFrame:
     return data
 
 
-def load_usage(exp_dir: Path, n_peers: int) -> pd.DataFrame:
+def load_usage(exp_dir: Path) -> pd.DataFrame:
     data = pd.read_csv(
         os.path.join(exp_dir, '%d/usage.txt' % n_peers),
         sep='\\s+',
