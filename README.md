@@ -1,49 +1,9 @@
-# Zenoh Perf Upgrade
+# Issue: Message Rate Drop
 
-This repo aims to upgrade the version of [zenoh-perf](https://github.com/atolab/zenoh-perf)
-from v0.5.0.beta9 to v0.6.0
+## Description
 
-## Throughput
-
-### Progress
-
-- [x] z_put_thr
-- [x] z_sub_thr
-- [ ] zn_pub_thr
-- [ ] zn_sub_thr
-- [ ] zn_sub_thr_stream
-- [ ] r_pub_thr
-- [ ] r_sub_thr
-- [ ] t_pubsub_thr
-- [ ] t_pub_thr
-- [ ] t_router_thr
-- [ ] t_sink_tcp
-- [ ] t_sink_udp
-- [ ] t_sub_thr
-
-## Usage
-
-Download [zenoh-perf v0.5.0-beta9](https://github.com/atolab/zenoh-perf),
-build it, and specify the path in `./config/v5.sh`.
-
-Run peer-to-peer testing for Zenoh 0.5.0-beta9
-
-```
-./p2p.sh ./config/v5.sh
-```
-
-Run peer-to-peer testing for Zenoh 0.6.0-dev
-
-```
-./p2p.sh ./config/v6.sh
-```
-
-## Results
-
-Throughput Comparison
-
-![](./results/throughput-comparison.png)
-
-Throughput Comparison in Ratio
-
-![](./results/throughput-comparison-in-ratio.png)
+By varying zenoh from
+[ae65c82916ba8f489d6d0f5d50985a720b8e1a45](https://github.com/eclipse-zenoh/zenoh/commit/ae65c82916ba8f489d6d0f5d50985a720b8e1a45)
+to
+[fefda301b2fa22d008d6837eb9da03aa6fc8b230](https://github.com/eclipse-zenoh/zenoh/commit/fefda301b2fa22d008d6837eb9da03aa6fc8b230),
+we found a performance drop while benchmarking the message rate of throughput.

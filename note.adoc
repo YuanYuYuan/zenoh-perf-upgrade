@@ -1,0 +1,34 @@
+[options="header", frame="topbot", grid="none"]
+|===
+| Commit | Status
+
+| a7d57a4f0a238491b8bfc90136fe32d181588fd5
+| failed
+
+
+| fdd2183cb479ca3b8fe0521051723c21ef6ef760
+| failed
+
+| 3851ba4f6f38fbee871ea53a82407f1b23b4f15e
+| failed
+
+| ae65c82916ba8f489d6d0f5d50985a720b8e1a45
+| failed
+
+| fefda301b2fa22d008d6837eb9da03aa6fc8b230
+| passed
+
+| c33a2415fd67bfa51c74185b49ad29168262ae44
+| passed
+
+| 4b4f106dbd6231f6817943bc9cdc41d1fd40ada2
+| passed
+
+| 9b8703a400f95222a5a9f5ac85404cd0729806a3
+| passed
+
+| 8c17ec6a732141124ceace889ae7888c9df5f5c2
+| passed
+
+
+|===

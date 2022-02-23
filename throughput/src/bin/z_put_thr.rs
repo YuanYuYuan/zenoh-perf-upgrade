@@ -15,6 +15,7 @@ use async_std::{task, sync::Arc};
 use std::{
     path::PathBuf,
     sync::atomic::{AtomicUsize, Ordering},
+    str::FromStr,
     time::Duration,
 };
 use structopt::StructOpt;
@@ -34,7 +35,7 @@ struct Opt {
     #[structopt(short, long, help = "locator(s), e.g. --locator tcp/127.0.0.1:7447 tcp/127.0.0.1:7448")]
     locator: Vec<Locator>,
     #[structopt(short, long, help = "peer, router, or client")]
-    mode: WhatAmI,
+    mode: String,
     #[structopt(short, long, help = "payload size (bytes)")]
     payload: usize,
     #[structopt(short = "t", long, help = "print the counter")]
@@ -64,7 +65,9 @@ async fn main() {
         } else {
             Config::default()
         };
-        config.set_mode(Some(mode)).unwrap();
+        config
+            .set_mode(Some(WhatAmI::from_str(&mode).unwrap()))
+            .unwrap();
         config.set_add_timestamp(Some(false)).unwrap();
         config.scouting.multicast.set_enabled(Some(false)).unwrap();
         config.peers.extend(locator);

@@ -1,0 +1,16 @@
+layer,scenario,test,name,size,messages
+zenoh,myTestConfig,throughput,20220223.020612,512,29395
+zenoh,myTestConfig,throughput,20220223.020612,512,1538550
+zenoh,myTestConfig,throughput,20220223.020612,512,1345821
+zenoh,myTestConfig,throughput,20220223.020612,512,1286212
+zenoh,myTestConfig,throughput,20220223.020612,512,1298728
+zenoh,myTestConfig,throughput,20220223.020612,512,1315517
+zenoh,myTestConfig,throughput,20220223.020612,512,1341878
+zenoh,myTestConfig,throughput,20220223.020612,512,1331552
+zenoh,myTestConfig,throughput,20220223.020612,512,1418665
+zenoh,myTestConfig,throughput,20220223.020612,512,1472337
+zenoh,myTestConfig,throughput,20220223.020612,512,1740702
+zenoh,myTestConfig,throughput,20220223.020612,512,1807939
+zenoh,myTestConfig,throughput,20220223.020612,512,1569739
+zenoh,myTestConfig,throughput,20220223.020612,512,1692878
+zenoh,myTestConfig,throughput,20220223.020612,512,1774679

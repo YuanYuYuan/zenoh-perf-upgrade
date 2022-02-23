@@ -1,0 +1,3 @@
+layer,scenario,test,name,size,messages
+zenoh,myTestConfig,throughput,20220223.130022,512000,89
+zenoh,myTestConfig,throughput,20220223.130022,512000,2008
